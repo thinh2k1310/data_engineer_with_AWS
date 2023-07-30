@@ -13,7 +13,7 @@ class StageToRedshiftOperator(BaseOperator):
         FROM '{}' 
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
-        FORMAT AS json '{}';
+        FORMAT AS json 'auto';
     """
 
     @apply_defaults
@@ -23,7 +23,6 @@ class StageToRedshiftOperator(BaseOperator):
                 table="",
                 s3_bucket="",
                 s3_key="",
-                log_json_file="",
                 *args, **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
@@ -31,7 +30,6 @@ class StageToRedshiftOperator(BaseOperator):
         self.redshift_conn_id = redshift_conn_id
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
-        self.log_json_file = log_json_file
         self.aws_credentials_id = aws_credentials_id
         self.execution_date = kwargs.get('execution_date')
 
@@ -47,24 +45,12 @@ class StageToRedshiftOperator(BaseOperator):
         rendered_key = self.s3_key.format(**context)
         s3_path = "s3://{}/{}".format(self.s3_bucket, rendered_key)
 
-
-        if self.log_json_file != "":
-            self.log_json_file = "s3://{}/{}".format(self.s3_bucket, self.log_json_file)
-            formatted_sql = StageToRedshiftOperator.copy_sql.format(
-                self.table,
-                s3_path,
-                aws_connection.login,
-                aws_connection.password,
-                self.log_json_file
-            )
-        else:
-            formatted_sql = StageToRedshiftOperator.copy_sql.format(
-                self.table,
-                s3_path,
-                aws_connection.login,
-                aws_connection.password,
-                'auto'
-            )
+        formatted_sql = StageToRedshiftOperator.copy_sql.format(
+            self.table,
+            s3_path,
+            aws_connection.login,
+            aws_connection.password
+        )
 
         redshift.run(formatted_sql)
         self.log.info(f"Successfully copied to Redshift table {self.table}")
