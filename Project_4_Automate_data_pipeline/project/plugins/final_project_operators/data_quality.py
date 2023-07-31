@@ -22,4 +22,5 @@ class DataQualityOperator(BaseOperator):
             self.log.info(f"Running Data Quality checks on table: {table}")
             records = redshift.get_records(f"SELECT COUNT(*) FROM {table};")
             if len(records) < 1 or len(records[0]) < 1 or records[0][0] < 1:
-                raise ValueError(f"{table} containe 0 rows")
+                raise ValueError(f"Data quality check failed. {table} containe 0 rows")
+            self.log.info(f"Data quality on table {table} check passed with {records[0][0]} records")

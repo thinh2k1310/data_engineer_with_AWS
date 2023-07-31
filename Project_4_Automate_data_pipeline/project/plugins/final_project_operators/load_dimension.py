@@ -24,3 +24,4 @@ class LoadDimensionOperator(BaseOperator):
             redshift.run(f"TRUNCATE TABLE {self.table}")
         self.log.info("Load data from staging to dimension table")
         redshift.run(self.sql_query)
+        self.log.info(f"Success: {self.task_id}")

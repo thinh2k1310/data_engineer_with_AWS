@@ -20,3 +20,4 @@ class LoadFactOperator(BaseOperator):
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
         self.log.info("Load data from staging to Fact table")
         redshift.run(self.sql_query)
+        self.log.info(f"Success: {self.task_id}")

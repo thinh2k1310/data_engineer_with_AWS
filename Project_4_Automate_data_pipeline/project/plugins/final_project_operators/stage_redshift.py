@@ -13,7 +13,8 @@ class StageToRedshiftOperator(BaseOperator):
         FROM '{}' 
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
-        FORMAT AS json 'auto';
+        FORMAT AS json 'auto'
+        REGION 'us-east-1';
     """
 
     @apply_defaults
@@ -23,7 +24,7 @@ class StageToRedshiftOperator(BaseOperator):
                 table="",
                 s3_bucket="",
                 s3_key="",
-                delete=""
+                delete="",
                 *args, **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)

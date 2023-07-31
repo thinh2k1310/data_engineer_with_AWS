@@ -8,6 +8,7 @@ from final_project_operators.load_fact import LoadFactOperator
 from final_project_operators.load_dimension import LoadDimensionOperator
 from final_project_operators.data_quality import DataQualityOperator
 from airflow.operators.python_operator import PythonOperator
+from airflow.hooks.postgres_hook import PostgresHook
 from udacity.common.final_project_sql_statements import SqlQueries
 import psycopg2
 
@@ -30,12 +31,14 @@ default_args = {
 
 def create_redshift_tables():
     # Connect to the Redshift database
+    redshift = PostgresHook(postgres_conn_id="redshift")
+    connection = redshift.get_connection()
     conn = psycopg2.connect(
-        host="default.055049684207.us-east-1.redshift-serverless.amazonaws.com",
-        port="5439",
-        database="dev",
-        user="awsuser",
-        password="Thinh1310"
+        host=connection.host,
+        port=connection.port,
+        database=connection.schema,
+        user=connection.login,
+        password=connection.password
     )
 
     # Open a cursor to execute SQL commands
@@ -58,7 +61,8 @@ def create_redshift_tables():
 @dag(
     default_args=default_args,
     description='Load and transform data in Redshift with Airflow',
-    schedule_interval='0 * * * *'
+    schedule_interval='0 * * * *',
+    max_active_runs=1
 )
 def final_project():
 
